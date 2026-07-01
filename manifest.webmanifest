@@ -1,6 +1,6 @@
 {
-  "name": "Tidal — Breathwork",
-  "short_name": "Tidal",
+  "name": "Brian's Breathwork App",
+  "short_name": "Breathwork",
   "description": "A free, beautifully simple breathwork app guided by a living, ocean-inspired scene.",
   "start_url": "./index.html",
   "scope": "./",
