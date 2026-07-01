@@ -49,12 +49,21 @@
         <div class="chip-row" id="durationList" role="radiogroup" aria-label="Session length"></div>
       </div>
 
-      <div class="field-group toggles">
-        <button class="toggle-btn" id="soundToggle" type="button" aria-pressed="true">
-          <svg viewBox="0 0 24 24" class="icon icon-sound-on"><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 010 7" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M19 6a9 9 0 010 12" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.6"/></svg>
-          <svg viewBox="0 0 24 24" class="icon icon-sound-off" hidden><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path d="M16 9l5 5M21 9l-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-          <span>Sound</span>
+      <div class="field-group">
+        <button class="sound-switch" id="soundToggle" type="button" role="switch" aria-checked="true">
+          <span class="sound-switch-icon">
+            <svg viewBox="0 0 24 24" class="icon icon-sound-on"><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 010 7" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M19 6a9 9 0 010 12" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.6"/></svg>
+            <svg viewBox="0 0 24 24" class="icon icon-sound-off icon-hidden" hidden><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path d="M16 9l5 5M21 9l-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </span>
+          <span class="sound-switch-text">
+            <span class="sound-switch-title">Sound</span>
+            <span class="sound-switch-state">Ocean ambience & chimes</span>
+          </span>
+          <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
         </button>
+      </div>
+
+      <div class="field-group toggles">
         <button class="toggle-btn" id="voiceToggle" type="button" aria-pressed="true" hidden>
           <svg viewBox="0 0 24 24" class="icon"><path d="M9 5a3 3 0 016 0v6a3 3 0 01-6 0V5z" fill="currentColor"/><path d="M5.5 11a6.5 6.5 0 0013 0" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M12 17.5V21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
           <span>Voice</span>
@@ -84,9 +93,9 @@
         <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
       </button>
       <span class="session-timer" id="sessionTimer">0:00</span>
-      <button class="icon-btn" id="sessionSoundBtn" type="button" aria-label="Toggle sound">
+      <button class="icon-btn" id="sessionSoundBtn" type="button" aria-label="Toggle sound" aria-pressed="true">
         <svg viewBox="0 0 24 24" class="icon icon-sound-on"><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 010 7" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
-        <svg viewBox="0 0 24 24" class="icon icon-sound-off" hidden><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path d="M16 9l5 5M21 9l-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <svg viewBox="0 0 24 24" class="icon icon-sound-off icon-hidden" hidden><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path d="M16 9l5 5M21 9l-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
       </button>
     </div>
 

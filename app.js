@@ -433,10 +433,19 @@ function selectDuration(value) {
   });
 }
 
+function setHidden(el, hide) {
+  // SVG elements don't reliably honor the `hidden` attribute/CSS pseudo across
+  // browsers, so visibility is driven by an explicit class instead.
+  el.classList.toggle('icon-hidden', hide);
+  if (hide) el.setAttribute('hidden', ''); else el.removeAttribute('hidden');
+}
 function setSoundUI(btn, on) {
-  btn.setAttribute('aria-pressed', String(on));
-  $('.icon-sound-on', btn).hidden = !on;
-  $('.icon-sound-off', btn).hidden = on;
+  if (btn.getAttribute('role') === 'switch') btn.setAttribute('aria-checked', String(on));
+  else btn.setAttribute('aria-pressed', String(on));
+  setHidden($('.icon-sound-on', btn), !on);
+  setHidden($('.icon-sound-off', btn), on);
+  const stateLabel = $('.sound-switch-state', btn);
+  if (stateLabel) stateLabel.textContent = on ? 'Ocean ambience & chimes' : 'Muted';
 }
 function applySound(on) {
   state.sound = on;
