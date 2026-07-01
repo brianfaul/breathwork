@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" data-technique="box">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+<title>Tidal — Breathe with the tide</title>
+<meta name="description" content="A free, beautifully simple breathwork app. Box breathing, 4-7-8, coherent breathing, and deep belly breathing — guided by a living, ocean-inspired scene." />
+
+<meta name="theme-color" content="#0b0e1f" />
+<meta name="color-scheme" content="dark" />
+<link rel="manifest" href="manifest.webmanifest" />
+
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Tidal" />
+<meta name="mobile-web-app-capable" content="yes" />
+
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<canvas id="scene" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+
+<div class="app" id="app">
+
+  <!-- ============ SETUP SCREEN ============ -->
+  <section class="screen setup-screen" id="setupScreen" data-visible="true">
+    <header class="brand">
+      <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
+        <path d="M4 30c6-8 10-8 16 0s10 8 16 0 6-8 8-8" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+        <path d="M4 22c6-8 10-8 16 0s10 8 16 0 6-8 8-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.45"/>
+      </svg>
+      <h1>Tidal</h1>
+      <p class="tagline">Breathe with the tide.</p>
+    </header>
+
+    <div class="setup-body">
+      <div class="field-group">
+        <span class="field-label">Technique</span>
+        <div class="technique-list" id="techniqueList" role="radiogroup" aria-label="Breathing technique"></div>
+        <p class="technique-desc" id="techniqueDesc"></p>
+      </div>
+
+      <div class="field-group">
+        <span class="field-label">Session length</span>
+        <div class="chip-row" id="durationList" role="radiogroup" aria-label="Session length"></div>
+      </div>
+
+      <div class="field-group toggles">
+        <button class="toggle-btn" id="soundToggle" type="button" aria-pressed="true">
+          <svg viewBox="0 0 24 24" class="icon icon-sound-on"><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 010 7" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M19 6a9 9 0 010 12" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.6"/></svg>
+          <svg viewBox="0 0 24 24" class="icon icon-sound-off" hidden><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path d="M16 9l5 5M21 9l-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span>Sound</span>
+        </button>
+        <button class="toggle-btn" id="hapticsToggle" type="button" aria-pressed="true" hidden>
+          <svg viewBox="0 0 24 24" class="icon"><rect x="7" y="2" width="10" height="20" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+          <span>Haptics</span>
+        </button>
+      </div>
+    </div>
+
+    <button class="begin-btn" id="beginBtn" type="button">
+      <span>Begin</span>
+    </button>
+
+    <button class="install-btn" id="installBtn" type="button" hidden>
+      <svg viewBox="0 0 24 24" class="icon"><path d="M12 3v12m0 0l-4-4m4 4l4-4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 17v2a2 2 0 002 2h10a2 2 0 002-2v-2" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+      Install app
+    </button>
+    <p class="ios-tip" id="iosTip" hidden>Tap <strong>Share</strong> → <strong>Add to Home Screen</strong> to install</p>
+  </section>
+
+  <!-- ============ SESSION SCREEN ============ -->
+  <section class="screen session-screen" id="sessionScreen" data-visible="false">
+    <div class="session-top">
+      <button class="icon-btn" id="stopBtn" type="button" aria-label="End session">
+        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+      <span class="session-timer" id="sessionTimer">0:00</span>
+      <button class="icon-btn" id="sessionSoundBtn" type="button" aria-label="Toggle sound">
+        <svg viewBox="0 0 24 24" class="icon icon-sound-on"><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 010 7" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+        <svg viewBox="0 0 24 24" class="icon icon-sound-off" hidden><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path d="M16 9l5 5M21 9l-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <div class="breath-focus">
+      <svg class="ring" viewBox="0 0 240 240" aria-hidden="true">
+        <circle class="ring-track" cx="120" cy="120" r="108" />
+        <circle class="ring-progress" id="ringProgress" cx="120" cy="120" r="108" />
+      </svg>
+      <div class="breath-copy">
+        <p class="phase-label" id="phaseLabel">Breathe In</p>
+        <p class="phase-count" id="phaseCount">4</p>
+      </div>
+    </div>
+
+    <div class="session-bottom">
+      <p class="cycle-count" id="cycleCount">Cycle 1</p>
+      <button class="pause-btn" id="pauseBtn" type="button">Pause</button>
+    </div>
+
+    <p class="sr-only" id="liveRegion" role="status" aria-live="polite"></p>
+  </section>
+
+  <!-- ============ COMPLETE SCREEN ============ -->
+  <section class="screen complete-screen" id="completeScreen" data-visible="false">
+    <svg class="complete-mark" viewBox="0 0 64 64" aria-hidden="true">
+      <circle cx="32" cy="32" r="30" fill="none" stroke="currentColor" stroke-width="2" opacity="0.5"/>
+      <path d="M20 33l8 8 16-18" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <h2>Session complete</h2>
+    <p class="complete-stats" id="completeStats">3 minutes · 12 cycles</p>
+    <p class="complete-note">Carry this calm with you.</p>
+    <div class="complete-actions">
+      <button class="ghost-btn" id="doneBtn" type="button">Done</button>
+      <button class="begin-btn" id="againBtn" type="button">Breathe again</button>
+    </div>
+  </section>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0d1230"/>
+      <stop offset="0.6" stop-color="#1b1440"/>
+      <stop offset="1" stop-color="#3a2350"/>
+    </linearGradient>
+    <linearGradient id="wave" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5eead4" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#5eead4" stop-opacity="0.25"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.4" r="0.55">
+      <stop offset="0" stop-color="#5eead4" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#5eead4" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#sky)"/>
+  <rect width="512" height="512" fill="url(#glow)"/>
+  <circle cx="180" cy="170" r="5" fill="#eafcf8" opacity="0.9"/>
+  <circle cx="340" cy="150" r="4" fill="#eafcf8" opacity="0.7"/>
+  <circle cx="280" cy="210" r="3" fill="#eafcf8" opacity="0.8"/>
+  <circle cx="150" cy="240" r="3.5" fill="#eafcf8" opacity="0.7"/>
+  <path d="M60 360 Q 150 330 240 360 T 452 360 V430 H60 Z" fill="url(#wave)" opacity="0.55"/>
+  <path d="M60 385 Q 160 415 260 385 T 452 385 V430 H60 Z" fill="url(#wave)"/>
+</svg>
