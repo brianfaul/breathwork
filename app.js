@@ -100,9 +100,9 @@ function speakPhase(label) {
   if (state.voice && state.sound) voiceEngine.say(label);
 }
 
-/* ---------------- Audio engine (fully synthesized) ---------------- */
+/* ---------------- Audio engine (fully synthesized ocean ambience) ---------------- */
 class AudioEngine {
-  constructor() { this.ctx = null; this.master = null; this.ambient = null; this.muted = false; }
+  constructor() { this.ctx = null; this.master = null; this.ambient = null; this.muted = false; this.noiseBuffer = null; }
   ensure() {
     if (!this.ctx) {
       const Ctx = window.AudioContext || window.webkitAudioContext;
@@ -113,42 +113,77 @@ class AudioEngine {
     }
     if (this.ctx.state === 'suspended') this.ctx.resume();
   }
+  _noiseBuffer() {
+    if (!this.noiseBuffer) {
+      const len = this.ctx.sampleRate * 3;
+      const buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+      this.noiseBuffer = buf;
+    }
+    return this.noiseBuffer;
+  }
+  _makeWaveLayer(destination, { filterFreq, filterQ, baseGain, periodA, periodB, modDepth }) {
+    const ctx = this.ctx;
+    const src = ctx.createBufferSource();
+    src.buffer = this._noiseBuffer();
+    src.loop = true;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass'; filter.frequency.value = filterFreq; filter.Q.value = filterQ;
+    const waveGain = ctx.createGain();
+    waveGain.gain.value = baseGain;
+    src.connect(filter); filter.connect(waveGain); waveGain.connect(destination);
+    const lfoA = ctx.createOscillator(); lfoA.type = 'sine'; lfoA.frequency.value = 1 / periodA;
+    const lfoAGain = ctx.createGain(); lfoAGain.gain.value = modDepth * 0.6;
+    lfoA.connect(lfoAGain); lfoAGain.connect(waveGain.gain);
+    const lfoB = ctx.createOscillator(); lfoB.type = 'sine'; lfoB.frequency.value = 1 / periodB;
+    const lfoBGain = ctx.createGain(); lfoBGain.gain.value = modDepth * 0.4;
+    lfoB.connect(lfoBGain); lfoBGain.connect(waveGain.gain);
+    src.start(); lfoA.start(); lfoB.start();
+    return { src, filter, waveGain, lfoA, lfoB, lfoAGain, lfoBGain };
+  }
   startAmbient() {
     this.ensure();
     if (this.ambient) return;
     const ctx = this.ctx;
     const gain = ctx.createGain();
-    gain.gain.value = this.muted ? 0 : 0.45;
+    gain.gain.value = this.muted ? 0 : 0.7;
     gain.connect(this.master);
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'lowpass'; filter.frequency.value = 480; filter.Q.value = 0.6;
-    filter.connect(gain);
+
+    const waveNear = this._makeWaveLayer(gain, { filterFreq: 1000, filterQ: 0.5, baseGain: 0.22, periodA: 6.4, periodB: 9.7, modDepth: 0.16 });
+    const waveFar = this._makeWaveLayer(gain, { filterFreq: 480, filterQ: 0.4, baseGain: 0.14, periodA: 8.3, periodB: 13.1, modDepth: 0.1 });
+
+    const padFilter = ctx.createBiquadFilter();
+    padFilter.type = 'lowpass'; padFilter.frequency.value = 420; padFilter.Q.value = 0.5;
+    padFilter.connect(gain);
     const freqs = [98, 147, 196];
     const oscs = freqs.map((f, i) => {
       const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = f;
-      const g = ctx.createGain(); g.gain.value = 0.055 / (i + 1);
-      o.connect(g); g.connect(filter); o.start();
+      const g = ctx.createGain(); g.gain.value = 0.02 / (i + 1);
+      o.connect(g); g.connect(padFilter); o.start();
       return o;
     });
-    const lfo = ctx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 0.045;
-    const lfoGain = ctx.createGain(); lfoGain.gain.value = 200;
-    lfo.connect(lfoGain); lfoGain.connect(filter.frequency); lfo.start();
-    this.ambient = { gain, filter, oscs, lfo, lfoGain };
+
+    this.ambient = { gain, waveNear, waveFar, oscs };
   }
   stopAmbient() {
     if (!this.ambient) return;
-    const { gain, oscs, lfo } = this.ambient;
+    const { gain, waveNear, waveFar, oscs } = this.ambient;
     const now = this.ctx.currentTime;
-    gain.gain.setTargetAtTime(0, now, 0.25);
+    gain.gain.setTargetAtTime(0, now, 0.4);
     setTimeout(() => {
+      [waveNear, waveFar].forEach((layer) => {
+        try { layer.src.stop(); } catch (e) {}
+        try { layer.lfoA.stop(); } catch (e) {}
+        try { layer.lfoB.stop(); } catch (e) {}
+      });
       oscs.forEach((o) => { try { o.stop(); } catch (e) {} });
-      try { lfo.stop(); } catch (e) {}
-    }, 800);
+    }, 900);
     this.ambient = null;
   }
   setMuted(m) {
     this.muted = m;
-    if (this.ambient) this.ambient.gain.gain.setTargetAtTime(m ? 0 : 0.45, this.ctx.currentTime, 0.35);
+    if (this.ambient) this.ambient.gain.gain.setTargetAtTime(m ? 0 : 0.7, this.ctx.currentTime, 0.35);
   }
   chime(phaseKey) {
     if (this.muted) return;
