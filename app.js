@@ -69,27 +69,46 @@ const state = {
 };
 
 /* ---------------- Voice cues (browser speech synthesis) ---------------- */
+// Ranked by how warm/husky/elegant they tend to sound across platforms —
+// checked in order, first match wins. Neural voices (Edge/iOS) sound far
+// richer than classic robotic SAPI voices, so they're prioritized first.
+const VOICE_PRIORITY = [
+  /microsoft sonia/i, /microsoft libby/i, /microsoft aria/i, /microsoft jenny/i,
+  /google uk english female/i,
+  /samantha/i, /victoria/i, /moira/i, /serena/i, /tessa/i, /karen/i,
+  /zira/i, /hazel/i, /susan/i, /catherine/i, /fiona/i, /kate/i, /joanna/i, /olivia/i, /emma/i,
+];
+const MALE_VOICE_NAMES = /\b(david|mark|guy|alex|daniel|fred|oliver|george|james|ryan|matthew|brian|eric|justin|kevin|male)\b/i;
+
 class VoiceEngine {
   constructor() {
     this.supported = 'speechSynthesis' in window;
     this.voice = null;
     if (this.supported) {
-      const pick = () => {
-        const voices = window.speechSynthesis.getVoices();
-        if (!voices.length) return;
-        this.voice = voices.find((v) => /en[-_]US/i.test(v.lang) && /female|samantha|aria|jenny|google us english/i.test(v.name))
-          || voices.find((v) => /^en/i.test(v.lang))
-          || voices[0];
-      };
-      pick();
-      window.speechSynthesis.onvoiceschanged = pick;
+      this._pick();
+      window.speechSynthesis.onvoiceschanged = () => this._pick();
     }
+  }
+  _pick() {
+    const voices = window.speechSynthesis.getVoices();
+    if (!voices.length) return false;
+    const pool = voices.filter((v) => /^en/i.test(v.lang));
+    const candidates = pool.length ? pool : voices;
+    for (const pattern of VOICE_PRIORITY) {
+      const match = candidates.find((v) => pattern.test(v.name));
+      if (match) { this.voice = match; return true; }
+    }
+    this.voice = candidates.find((v) => /female/i.test(v.name) && !MALE_VOICE_NAMES.test(v.name))
+      || candidates.find((v) => !MALE_VOICE_NAMES.test(v.name))
+      || candidates[0];
+    return true;
   }
   say(text) {
     if (!this.supported) return;
+    if (!this.voice) this._pick();
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.rate = 0.88; u.pitch = 1; u.volume = 0.9;
+    u.rate = 0.85; u.pitch = 0.88; u.volume = 0.9;
     if (this.voice) u.voice = this.voice;
     window.speechSynthesis.speak(u);
   }
