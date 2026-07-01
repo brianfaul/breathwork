@@ -65,7 +65,40 @@ const state = {
   duration: store.get('duration', 180),
   sound: store.get('sound', true),
   haptics: store.get('haptics', true),
+  voice: store.get('voice', true),
 };
+
+/* ---------------- Voice cues (browser speech synthesis) ---------------- */
+class VoiceEngine {
+  constructor() {
+    this.supported = 'speechSynthesis' in window;
+    this.voice = null;
+    if (this.supported) {
+      const pick = () => {
+        const voices = window.speechSynthesis.getVoices();
+        if (!voices.length) return;
+        this.voice = voices.find((v) => /en[-_]US/i.test(v.lang) && /female|samantha|aria|jenny|google us english/i.test(v.name))
+          || voices.find((v) => /^en/i.test(v.lang))
+          || voices[0];
+      };
+      pick();
+      window.speechSynthesis.onvoiceschanged = pick;
+    }
+  }
+  say(text) {
+    if (!this.supported) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 0.88; u.pitch = 1; u.volume = 0.9;
+    if (this.voice) u.voice = this.voice;
+    window.speechSynthesis.speak(u);
+  }
+  stop() { if (this.supported) window.speechSynthesis.cancel(); }
+}
+const voiceEngine = new VoiceEngine();
+function speakPhase(label) {
+  if (state.voice && state.sound) voiceEngine.say(label);
+}
 
 /* ---------------- Audio engine (fully synthesized) ---------------- */
 class AudioEngine {
@@ -268,7 +301,7 @@ const session = {
 const els = {
   setup: byId('setupScreen'), sessionScreen: byId('sessionScreen'), complete: byId('completeScreen'),
   techniqueList: byId('techniqueList'), techniqueDesc: byId('techniqueDesc'), durationList: byId('durationList'),
-  soundToggle: byId('soundToggle'), hapticsToggle: byId('hapticsToggle'),
+  soundToggle: byId('soundToggle'), hapticsToggle: byId('hapticsToggle'), voiceToggle: byId('voiceToggle'),
   beginBtn: byId('beginBtn'), installBtn: byId('installBtn'), iosTip: byId('iosTip'),
   stopBtn: byId('stopBtn'), pauseBtn: byId('pauseBtn'), sessionSoundBtn: byId('sessionSoundBtn'),
   sessionTimer: byId('sessionTimer'), ring: byId('ringProgress'), phaseLabel: byId('phaseLabel'),
@@ -357,9 +390,21 @@ function applySound(on) {
   setSoundUI(els.soundToggle, on);
   setSoundUI(els.sessionSoundBtn, on);
   audio.setMuted(!on);
+  if (!on) voiceEngine.stop();
 }
 els.soundToggle.addEventListener('click', () => applySound(!state.sound));
 els.sessionSoundBtn.addEventListener('click', () => applySound(!state.sound));
+
+if (voiceEngine.supported) {
+  els.voiceToggle.hidden = false;
+  els.voiceToggle.setAttribute('aria-pressed', String(state.voice));
+  els.voiceToggle.addEventListener('click', () => {
+    state.voice = !state.voice;
+    store.set('voice', state.voice);
+    els.voiceToggle.setAttribute('aria-pressed', String(state.voice));
+    if (!state.voice) voiceEngine.stop();
+  });
+}
 
 if ('vibrate' in navigator) {
   els.hapticsToggle.hidden = false;
@@ -390,6 +435,7 @@ function startSession() {
   audio.ensure();
   if (state.sound) audio.startAmbient();
   audio.chime(session.phases[0].key);
+  speakPhase(session.phases[0].label);
   vibrate(12);
 
   els.phaseLabel.textContent = session.phases[0].label;
@@ -415,12 +461,14 @@ function advancePhase(now) {
   els.cycleCount.textContent = 'Cycle ' + session.cycleNum;
   els.liveRegion.textContent = phase.label;
   audio.chime(phase.key);
+  speakPhase(phase.label);
   vibrate(phase.key === 'inhale' ? 14 : 10);
 }
 
 function finishSession(now) {
   session.running = false;
   audio.stopAmbient();
+  voiceEngine.stop();
   const elapsedMin = Math.max(1, Math.round((now - session.sessionStartTime) / 60000));
   const cycles = Math.max(1, session.cycleNum - 1);
   els.completeStats.textContent = `${elapsedMin} minute${elapsedMin === 1 ? '' : 's'} · ${cycles} cycle${cycles === 1 ? '' : 's'}`;
@@ -430,6 +478,7 @@ function finishSession(now) {
 function stopSession() {
   session.running = false;
   audio.stopAmbient();
+  voiceEngine.stop();
   showScreen('setup');
 }
 
@@ -448,6 +497,7 @@ function togglePause() {
     session.pausedAt = now;
     els.pauseBtn.textContent = 'Resume';
     audio.stopAmbient();
+    voiceEngine.stop();
   }
 }
 
