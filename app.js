@@ -116,7 +116,7 @@ class VoiceEngine {
 }
 const voiceEngine = new VoiceEngine();
 function speakPhase(label) {
-  if (state.voice && state.sound) voiceEngine.say(label);
+  if (state.voice) voiceEngine.say(label);
 }
 
 /* ---------------- Audio engine (fully synthesized ocean ambience) ---------------- */
@@ -453,20 +453,20 @@ function applySound(on) {
   setSoundUI(els.soundToggle, on);
   setSoundUI(els.sessionSoundBtn, on);
   audio.setMuted(!on);
-  if (!on) voiceEngine.stop();
 }
 els.soundToggle.addEventListener('click', () => applySound(!state.sound));
 els.sessionSoundBtn.addEventListener('click', () => applySound(!state.sound));
 
+function applyVoice(on) {
+  state.voice = on;
+  store.set('voice', on);
+  els.voiceToggle.setAttribute('aria-pressed', String(on));
+  if (!on) voiceEngine.stop();
+}
 if (voiceEngine.supported) {
   els.voiceToggle.hidden = false;
   els.voiceToggle.setAttribute('aria-pressed', String(state.voice));
-  els.voiceToggle.addEventListener('click', () => {
-    state.voice = !state.voice;
-    store.set('voice', state.voice);
-    els.voiceToggle.setAttribute('aria-pressed', String(state.voice));
-    if (!state.voice) voiceEngine.stop();
-  });
+  els.voiceToggle.addEventListener('click', () => applyVoice(!state.voice));
 }
 
 if ('vibrate' in navigator) {
