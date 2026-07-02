@@ -7,56 +7,56 @@
 // builder's user-defined timing and patterns with an odd number of phases.
 const TECHNIQUES = [
   {
-    id: 'box', name: 'Box', meta: '4-4-4-4',
-    desc: 'Equal parts inhale, hold, exhale, hold. Used by Navy SEALs to stay calm and focused under pressure.',
+    id: 'box', name: 'Box', meta: '3-3-3-3',
+    desc: 'Equal parts inhale, hold, exhale, hold. A gentler count than the classic Navy SEAL version — steady and easy to sustain.',
     phases: [
-      { label: 'Breathe In', dur: 4, target: 1 },
-      { label: 'Hold', dur: 4, target: 1 },
-      { label: 'Breathe Out', dur: 4, target: 0 },
-      { label: 'Hold', dur: 4, target: 0 },
+      { label: 'Breathe In', dur: 3, target: 1 },
+      { label: 'Hold', dur: 3, target: 1 },
+      { label: 'Breathe Out', dur: 3, target: 0 },
+      { label: 'Hold', dur: 3, target: 0 },
     ],
   },
   {
-    id: '478', name: '4-7-8', meta: '4-7-8',
-    desc: "Dr. Andrew Weil's deeply relaxing pattern — a long, slow exhale melts tension and eases you toward sleep.",
+    id: '478', name: 'Calm Exhale', meta: '3-5-6',
+    desc: "A gentler pace inspired by Dr. Andrew Weil's 4-7-8 method — a short hold and a long exhale to melt tension. Work up to the full 4-7-8 count as it gets easier.",
     phases: [
-      { label: 'Breathe In', dur: 4, target: 1 },
-      { label: 'Hold', dur: 7, target: 1 },
-      { label: 'Breathe Out', dur: 8, target: 0 },
-    ],
-  },
-  {
-    id: 'coherent', name: 'Coherent', meta: '5.5-5.5',
-    desc: 'Smooth, even breathing at about 5.5 breaths a minute to balance your nervous system.',
-    phases: [
-      { label: 'Breathe In', dur: 5.5, target: 1 },
-      { label: 'Breathe Out', dur: 5.5, target: 0 },
-    ],
-  },
-  {
-    id: 'belly', name: 'Deep Belly', meta: '4-6',
-    desc: "Slow diaphragmatic breathing with an extended exhale to trigger your body's relaxation response.",
-    phases: [
-      { label: 'Breathe In', dur: 4, target: 1 },
+      { label: 'Breathe In', dur: 3, target: 1 },
+      { label: 'Hold', dur: 5, target: 1 },
       { label: 'Breathe Out', dur: 6, target: 0 },
     ],
   },
   {
-    id: 'triangle', name: 'Triangle', meta: '4-4-4',
-    desc: 'Three equal parts — inhale, hold, exhale — with no pause at the bottom. A simple, steady rhythm.',
+    id: 'coherent', name: 'Coherent', meta: '5-5',
+    desc: 'Smooth, even breathing at about 6 breaths a minute to balance your nervous system.',
     phases: [
-      { label: 'Breathe In', dur: 4, target: 1 },
-      { label: 'Hold', dur: 4, target: 1 },
-      { label: 'Breathe Out', dur: 4, target: 0 },
+      { label: 'Breathe In', dur: 5, target: 1 },
+      { label: 'Breathe Out', dur: 5, target: 0 },
     ],
   },
   {
-    id: 'relaxing', name: 'Relaxing', meta: '4-4-8',
-    desc: 'A short hold and a long, easy exhale — a well-known ratio for taking the edge off anxiety.',
+    id: 'belly', name: 'Deep Belly', meta: '4-5',
+    desc: "Slow diaphragmatic breathing with an extended exhale to trigger your body's relaxation response.",
     phases: [
       { label: 'Breathe In', dur: 4, target: 1 },
-      { label: 'Hold', dur: 4, target: 1 },
-      { label: 'Breathe Out', dur: 8, target: 0 },
+      { label: 'Breathe Out', dur: 5, target: 0 },
+    ],
+  },
+  {
+    id: 'triangle', name: 'Triangle', meta: '3-3-3',
+    desc: 'Three equal parts — inhale, hold, exhale — with no pause at the bottom. A simple, steady rhythm.',
+    phases: [
+      { label: 'Breathe In', dur: 3, target: 1 },
+      { label: 'Hold', dur: 3, target: 1 },
+      { label: 'Breathe Out', dur: 3, target: 0 },
+    ],
+  },
+  {
+    id: 'relaxing', name: 'Relaxing', meta: '3-3-5',
+    desc: 'A short hold and a long, easy exhale — a gentle ratio for taking the edge off anxiety.',
+    phases: [
+      { label: 'Breathe In', dur: 3, target: 1 },
+      { label: 'Hold', dur: 3, target: 1 },
+      { label: 'Breathe Out', dur: 5, target: 0 },
     ],
   },
   {
@@ -110,7 +110,7 @@ const state = {
   sound: store.get('sound', true),
   haptics: store.get('haptics', true),
   voice: store.get('voice', true),
-  custom: store.get('custom', { inhale: 4, hold1: 4, exhale: 6, hold2: 0 }),
+  custom: store.get('custom', { inhale: 3, hold1: 3, exhale: 5, hold2: 0 }),
 };
 
 /* ---------------- Voice cues (browser speech synthesis) ---------------- */
