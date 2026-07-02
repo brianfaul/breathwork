@@ -7,7 +7,7 @@
 // builder's user-defined timing and patterns with an odd number of phases.
 const TECHNIQUES = [
   {
-    id: 'box', name: 'Box', meta: '4-4-4-4', accent: '#5eead4',
+    id: 'box', name: 'Box', meta: '4-4-4-4',
     desc: 'Equal parts inhale, hold, exhale, hold. Used by Navy SEALs to stay calm and focused under pressure.',
     phases: [
       { label: 'Breathe In', dur: 4, target: 1 },
@@ -17,7 +17,7 @@ const TECHNIQUES = [
     ],
   },
   {
-    id: '478', name: '4-7-8', meta: '4-7-8', accent: '#fbbf24',
+    id: '478', name: '4-7-8', meta: '4-7-8',
     desc: "Dr. Andrew Weil's deeply relaxing pattern — a long, slow exhale melts tension and eases you toward sleep.",
     phases: [
       { label: 'Breathe In', dur: 4, target: 1 },
@@ -26,7 +26,7 @@ const TECHNIQUES = [
     ],
   },
   {
-    id: 'coherent', name: 'Coherent', meta: '5.5-5.5', accent: '#c4b5fd',
+    id: 'coherent', name: 'Coherent', meta: '5.5-5.5',
     desc: 'Smooth, even breathing at about 5.5 breaths a minute to balance your nervous system.',
     phases: [
       { label: 'Breathe In', dur: 5.5, target: 1 },
@@ -34,7 +34,7 @@ const TECHNIQUES = [
     ],
   },
   {
-    id: 'belly', name: 'Deep Belly', meta: '4-6', accent: '#fda4af',
+    id: 'belly', name: 'Deep Belly', meta: '4-6',
     desc: "Slow diaphragmatic breathing with an extended exhale to trigger your body's relaxation response.",
     phases: [
       { label: 'Breathe In', dur: 4, target: 1 },
@@ -42,7 +42,7 @@ const TECHNIQUES = [
     ],
   },
   {
-    id: 'triangle', name: 'Triangle', meta: '4-4-4', accent: '#7dd3fc',
+    id: 'triangle', name: 'Triangle', meta: '4-4-4',
     desc: 'Three equal parts — inhale, hold, exhale — with no pause at the bottom. A simple, steady rhythm.',
     phases: [
       { label: 'Breathe In', dur: 4, target: 1 },
@@ -51,7 +51,7 @@ const TECHNIQUES = [
     ],
   },
   {
-    id: 'relaxing', name: 'Relaxing', meta: '4-4-8', accent: '#86efac',
+    id: 'relaxing', name: 'Relaxing', meta: '4-4-8',
     desc: 'A short hold and a long, easy exhale — a well-known ratio for taking the edge off anxiety.',
     phases: [
       { label: 'Breathe In', dur: 4, target: 1 },
@@ -60,7 +60,7 @@ const TECHNIQUES = [
     ],
   },
   {
-    id: 'custom', name: 'Custom', meta: '', accent: '#f0abfc',
+    id: 'custom', name: 'Custom', meta: '',
     desc: 'Set your own inhale, hold, and exhale timing below.',
     phases: null,
   },
@@ -205,7 +205,7 @@ function vibrate(ms) {
 const canvas = byId('scene');
 const ctx = canvas.getContext('2d');
 let W = 0, H = 0, DPR = 1;
-let currentAccent = TECHNIQUES.find((t) => t.id === state.technique).accent;
+const ACCENT = '#2dd4bf';
 
 function resize() {
   DPR = Math.min(window.devicePixelRatio || 1, 2);
@@ -240,10 +240,10 @@ function makeParticle(spawnAnywhere) {
     twinkleOffset: Math.random() * Math.PI * 2,
   };
 }
-const particles = Array.from({ length: 46 }, () => makeParticle(true));
+const particles = Array.from({ length: 30 }, () => makeParticle(true));
 
-const NIGHT = ['#04050d', '#0d1230', '#1b1440'];
-const DAWN = ['#1c2c4d', '#5b3f78', '#e8875f'];
+const NIGHT = ['#04060c', '#0a111f', '#0e1830'];
+const DAWN = ['#0b1220', '#111e34', '#17293f'];
 
 let lastFrame = performance.now();
 
@@ -264,8 +264,8 @@ function renderScene(now, breathValue, dawnProgress) {
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
   const glow = ctx.createRadialGradient(W * 0.5, H * 0.38, 0, W * 0.5, H * 0.38, Math.max(W, H) * 0.6);
-  glow.addColorStop(0, rgba(currentAccent, 0.10 * breathValue));
-  glow.addColorStop(1, rgba(currentAccent, 0));
+  glow.addColorStop(0, rgba(ACCENT, 0.06 * breathValue));
+  glow.addColorStop(1, rgba(ACCENT, 0));
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, W, H);
   ctx.restore();
@@ -278,19 +278,19 @@ function renderScene(now, breathValue, dawnProgress) {
     if (p.fy < -0.06) Object.assign(p, makeParticle(false));
     const x = p.fx * W, y = p.fy * H;
     const twinkle = 0.5 + 0.5 * Math.sin(now / 1000 * p.twinkleSpeed + p.twinkleOffset);
-    const alpha = (0.12 + 0.5 * twinkle) * (0.45 + 0.55 * breathValue);
-    const rad = p.r * (0.85 + 0.35 * breathValue) * 4;
+    const alpha = (0.08 + 0.32 * twinkle) * (0.45 + 0.55 * breathValue);
+    const rad = p.r * (0.85 + 0.35 * breathValue) * 3.4;
     const g = ctx.createRadialGradient(x, y, 0, x, y, rad);
-    g.addColorStop(0, rgba(currentAccent, alpha));
-    g.addColorStop(1, rgba(currentAccent, 0));
+    g.addColorStop(0, rgba(ACCENT, alpha));
+    g.addColorStop(1, rgba(ACCENT, 0));
     ctx.fillStyle = g;
     ctx.beginPath(); ctx.arc(x, y, rad, 0, Math.PI * 2); ctx.fill();
   });
 
   // tide waves
   const baseline = H * (0.9 - breathValue * 0.055);
-  drawWave(now, baseline + 20, 22, 2.0, -0.35, 0.11);
-  drawWave(now, baseline, 15, 1.35, 0.55, 0.17);
+  drawWave(now, baseline + 20, 18, 2.0, -0.35, 0.08);
+  drawWave(now, baseline, 12, 1.35, 0.55, 0.12);
 
   // vignette
   const vg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.75);
@@ -311,7 +311,7 @@ function drawWave(now, baseline, amplitude, waveCount, speed, alpha) {
   }
   ctx.lineTo(W, H);
   ctx.closePath();
-  ctx.fillStyle = rgba(currentAccent, alpha);
+  ctx.fillStyle = rgba(ACCENT, alpha);
   ctx.fill();
 }
 
@@ -347,11 +347,6 @@ function showScreen(name) {
 
 function techniqueById(id) { return TECHNIQUES.find((t) => t.id === id); }
 
-function applyTechniqueAccent(id) {
-  document.documentElement.dataset.technique = id;
-  currentAccent = techniqueById(id).accent;
-}
-
 function formatTime(totalSeconds) {
   const s = Math.max(0, Math.round(totalSeconds));
   const m = Math.floor(s / 60);
@@ -385,7 +380,6 @@ function renderTechniqueList() {
 function selectTechnique(id) {
   state.technique = id;
   store.set('technique', id);
-  applyTechniqueAccent(id);
   [...els.techniqueList.children].forEach((child, i) => {
     child.setAttribute('aria-checked', String(TECHNIQUES[i].id === id));
   });
@@ -642,7 +636,6 @@ if ('serviceWorker' in navigator) {
 }
 
 /* ---------------- init ---------------- */
-applyTechniqueAccent(state.technique);
 renderTechniqueList();
 renderCustomEditor();
 renderDurationList();
