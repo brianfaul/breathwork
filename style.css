@@ -18,8 +18,17 @@ html[data-technique="box"]      { --accent: #5eead4; --accent-soft: rgba(94,234,
 html[data-technique="478"]      { --accent: #fbbf24; --accent-soft: rgba(251,191,36,0.18);  --accent-dim: rgba(251,191,36,0.08); }
 html[data-technique="coherent"] { --accent: #c4b5fd; --accent-soft: rgba(196,181,253,0.18); --accent-dim: rgba(196,181,253,0.08); }
 html[data-technique="belly"]    { --accent: #fda4af; --accent-soft: rgba(253,164,175,0.18); --accent-dim: rgba(253,164,175,0.08); }
+html[data-technique="triangle"] { --accent: #7dd3fc; --accent-soft: rgba(125,211,252,0.18); --accent-dim: rgba(125,211,252,0.08); }
+html[data-technique="relaxing"] { --accent: #86efac; --accent-soft: rgba(134,239,172,0.18); --accent-dim: rgba(134,239,172,0.08); }
+html[data-technique="custom"]   { --accent: #f0abfc; --accent-soft: rgba(240,171,252,0.18); --accent-dim: rgba(240,171,252,0.08); }
 
 * { box-sizing: border-box; }
+/* Author rules that set `display` on an element (e.g. `.foo { display: flex }`)
+   otherwise beat the UA's `[hidden] { display: none }` rule in the cascade,
+   even though both have the same specificity — origin order wins. This
+   reasserts `hidden` as the final word regardless of what else targets the
+   element. */
+[hidden] { display: none !important; }
 .icon-hidden { display: none; }
 
 html, body {
@@ -128,6 +137,10 @@ html, body {
   background: var(--accent-dim);
   box-shadow: 0 0 0 1px var(--accent-soft) inset;
 }
+.technique-card[data-id="custom"] {
+  grid-column: 1 / -1;
+  border-style: dashed;
+}
 
 .technique-desc {
   margin: 12px 2px 0;
@@ -135,6 +148,48 @@ html, body {
   line-height: 1.5;
   color: var(--ink-dim);
   min-height: 2.7em;
+}
+
+.custom-editor {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 6px 16px;
+}
+.stepper-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+}
+.stepper-row + .stepper-row { border-top: 1px solid var(--glass-border); }
+.stepper-row-label { font-size: 0.88rem; color: var(--ink); }
+.stepper { display: flex; align-items: center; gap: 14px; }
+.stepper-btn {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ink);
+  font-size: 1.1rem;
+  line-height: 1;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.2s var(--ease), background 0.2s var(--ease), transform 0.15s var(--ease);
+}
+.stepper-btn:active { transform: scale(0.88); }
+.stepper-btn:hover { border-color: var(--accent-soft); }
+.stepper-value {
+  min-width: 34px;
+  text-align: center;
+  font-size: 0.92rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-dim);
 }
 
 .chip-row { display: flex; gap: 8px; flex-wrap: wrap; }

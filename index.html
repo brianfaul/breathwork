@@ -42,6 +42,41 @@
         <span class="field-label">Technique</span>
         <div class="technique-list" id="techniqueList" role="radiogroup" aria-label="Breathing technique"></div>
         <p class="technique-desc" id="techniqueDesc"></p>
+
+        <div class="custom-editor" id="customEditor" hidden>
+          <div class="stepper-row" data-phase="inhale">
+            <span class="stepper-row-label">Inhale</span>
+            <div class="stepper">
+              <button type="button" class="stepper-btn" data-dir="-1" aria-label="Decrease inhale duration">−</button>
+              <span class="stepper-value">4s</span>
+              <button type="button" class="stepper-btn" data-dir="1" aria-label="Increase inhale duration">+</button>
+            </div>
+          </div>
+          <div class="stepper-row" data-phase="hold1">
+            <span class="stepper-row-label">Hold</span>
+            <div class="stepper">
+              <button type="button" class="stepper-btn" data-dir="-1" aria-label="Decrease first hold duration">−</button>
+              <span class="stepper-value">4s</span>
+              <button type="button" class="stepper-btn" data-dir="1" aria-label="Increase first hold duration">+</button>
+            </div>
+          </div>
+          <div class="stepper-row" data-phase="exhale">
+            <span class="stepper-row-label">Exhale</span>
+            <div class="stepper">
+              <button type="button" class="stepper-btn" data-dir="-1" aria-label="Decrease exhale duration">−</button>
+              <span class="stepper-value">6s</span>
+              <button type="button" class="stepper-btn" data-dir="1" aria-label="Increase exhale duration">+</button>
+            </div>
+          </div>
+          <div class="stepper-row" data-phase="hold2">
+            <span class="stepper-row-label">Hold</span>
+            <div class="stepper">
+              <button type="button" class="stepper-btn" data-dir="-1" aria-label="Decrease second hold duration">−</button>
+              <span class="stepper-value">Off</span>
+              <button type="button" class="stepper-btn" data-dir="1" aria-label="Increase second hold duration">+</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="field-group">

@@ -2,44 +2,88 @@
 'use strict';
 
 /* ---------------- Techniques ---------------- */
+// Each phase declares its own target (1 = full inhale, 0 = full exhale) rather
+// than a fixed key, so any sequence of phases works — including the custom
+// builder's user-defined timing and patterns with an odd number of phases.
 const TECHNIQUES = [
   {
     id: 'box', name: 'Box', meta: '4-4-4-4', accent: '#5eead4',
     desc: 'Equal parts inhale, hold, exhale, hold. Used by Navy SEALs to stay calm and focused under pressure.',
     phases: [
-      { key: 'inhale', dur: 4, label: 'Breathe In' },
-      { key: 'hold1', dur: 4, label: 'Hold' },
-      { key: 'exhale', dur: 4, label: 'Breathe Out' },
-      { key: 'hold2', dur: 4, label: 'Hold' },
+      { label: 'Breathe In', dur: 4, target: 1 },
+      { label: 'Hold', dur: 4, target: 1 },
+      { label: 'Breathe Out', dur: 4, target: 0 },
+      { label: 'Hold', dur: 4, target: 0 },
     ],
   },
   {
     id: '478', name: '4-7-8', meta: '4-7-8', accent: '#fbbf24',
     desc: "Dr. Andrew Weil's deeply relaxing pattern — a long, slow exhale melts tension and eases you toward sleep.",
     phases: [
-      { key: 'inhale', dur: 4, label: 'Breathe In' },
-      { key: 'hold1', dur: 7, label: 'Hold' },
-      { key: 'exhale', dur: 8, label: 'Breathe Out' },
+      { label: 'Breathe In', dur: 4, target: 1 },
+      { label: 'Hold', dur: 7, target: 1 },
+      { label: 'Breathe Out', dur: 8, target: 0 },
     ],
   },
   {
     id: 'coherent', name: 'Coherent', meta: '5.5-5.5', accent: '#c4b5fd',
     desc: 'Smooth, even breathing at about 5.5 breaths a minute to balance your nervous system.',
     phases: [
-      { key: 'inhale', dur: 5.5, label: 'Breathe In' },
-      { key: 'exhale', dur: 5.5, label: 'Breathe Out' },
+      { label: 'Breathe In', dur: 5.5, target: 1 },
+      { label: 'Breathe Out', dur: 5.5, target: 0 },
     ],
   },
   {
     id: 'belly', name: 'Deep Belly', meta: '4-6', accent: '#fda4af',
     desc: "Slow diaphragmatic breathing with an extended exhale to trigger your body's relaxation response.",
     phases: [
-      { key: 'inhale', dur: 4, label: 'Breathe In' },
-      { key: 'exhale', dur: 6, label: 'Breathe Out' },
+      { label: 'Breathe In', dur: 4, target: 1 },
+      { label: 'Breathe Out', dur: 6, target: 0 },
     ],
   },
+  {
+    id: 'triangle', name: 'Triangle', meta: '4-4-4', accent: '#7dd3fc',
+    desc: 'Three equal parts — inhale, hold, exhale — with no pause at the bottom. A simple, steady rhythm.',
+    phases: [
+      { label: 'Breathe In', dur: 4, target: 1 },
+      { label: 'Hold', dur: 4, target: 1 },
+      { label: 'Breathe Out', dur: 4, target: 0 },
+    ],
+  },
+  {
+    id: 'relaxing', name: 'Relaxing', meta: '4-4-8', accent: '#86efac',
+    desc: 'A short hold and a long, easy exhale — a well-known ratio for taking the edge off anxiety.',
+    phases: [
+      { label: 'Breathe In', dur: 4, target: 1 },
+      { label: 'Hold', dur: 4, target: 1 },
+      { label: 'Breathe Out', dur: 8, target: 0 },
+    ],
+  },
+  {
+    id: 'custom', name: 'Custom', meta: '', accent: '#f0abfc',
+    desc: 'Set your own inhale, hold, and exhale timing below.',
+    phases: null,
+  },
 ];
-const TARGET_FOR = { inhale: 1, hold1: 1, exhale: 0, hold2: 0 };
+const CUSTOM_LIMITS = {
+  inhale: { min: 2, max: 15 },
+  hold1: { min: 0, max: 15 },
+  exhale: { min: 2, max: 15 },
+  hold2: { min: 0, max: 15 },
+};
+function getTechniquePhases(id) {
+  if (id !== 'custom') return techniqueById(id).phases;
+  const c = state.custom;
+  const phases = [{ label: 'Breathe In', dur: c.inhale, target: 1 }];
+  if (c.hold1 > 0) phases.push({ label: 'Hold', dur: c.hold1, target: 1 });
+  phases.push({ label: 'Breathe Out', dur: c.exhale, target: 0 });
+  if (c.hold2 > 0) phases.push({ label: 'Hold', dur: c.hold2, target: 0 });
+  return phases;
+}
+function toneFor(target, isHold) {
+  if (target === 1) return isHold ? 784 : 660;
+  return isHold ? 330 : 392;
+}
 const DURATIONS = [
   { label: '1 min', value: 60 },
   { label: '3 min', value: 180 },
@@ -66,6 +110,7 @@ const state = {
   sound: store.get('sound', true),
   haptics: store.get('haptics', true),
   voice: store.get('voice', true),
+  custom: store.get('custom', { inhale: 4, hold1: 4, exhale: 6, hold2: 0 }),
 };
 
 /* ---------------- Voice cues (browser speech synthesis) ---------------- */
@@ -133,12 +178,10 @@ class AudioEngine {
     if (this.ctx.state === 'suspended') this.ctx.resume();
   }
   setMuted(m) { this.muted = m; }
-  chime(phaseKey) {
+  chime(freq) {
     if (this.muted) return;
     this.ensure();
     const ctx = this.ctx;
-    const freqMap = { inhale: 660, hold1: 784, exhale: 392, hold2: 330 };
-    const freq = freqMap[phaseKey] || 440;
     const now = ctx.currentTime;
     const osc = ctx.createOscillator(); osc.type = 'sine'; osc.frequency.value = freq;
     const gain = ctx.createGain();
@@ -284,6 +327,7 @@ const session = {
 const els = {
   setup: byId('setupScreen'), sessionScreen: byId('sessionScreen'), complete: byId('completeScreen'),
   techniqueList: byId('techniqueList'), techniqueDesc: byId('techniqueDesc'), durationList: byId('durationList'),
+  customEditor: byId('customEditor'),
   soundToggle: byId('soundToggle'), hapticsToggle: byId('hapticsToggle'), voiceToggle: byId('voiceToggle'),
   beginBtn: byId('beginBtn'), installBtn: byId('installBtn'), iosTip: byId('iosTip'),
   stopBtn: byId('stopBtn'), pauseBtn: byId('pauseBtn'), sessionSoundBtn: byId('sessionSoundBtn'),
@@ -316,19 +360,26 @@ function formatTime(totalSeconds) {
 }
 
 /* ---- setup screen rendering ---- */
+function customMetaText() {
+  const c = state.custom;
+  return `${c.inhale}-${c.hold1}-${c.exhale}-${c.hold2}`;
+}
 function renderTechniqueList() {
   els.techniqueList.innerHTML = '';
   TECHNIQUES.forEach((t) => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'technique-card';
+    btn.dataset.id = t.id;
     btn.setAttribute('role', 'radio');
     btn.setAttribute('aria-checked', String(t.id === state.technique));
-    btn.innerHTML = `<span class="t-name">${t.name}</span><span class="t-meta">${t.meta}</span>`;
+    const meta = t.id === 'custom' ? customMetaText() : t.meta;
+    btn.innerHTML = `<span class="t-name">${t.name}</span><span class="t-meta">${meta}</span>`;
     btn.addEventListener('click', () => selectTechnique(t.id));
     els.techniqueList.appendChild(btn);
   });
   els.techniqueDesc.textContent = techniqueById(state.technique).desc;
+  els.customEditor.hidden = state.technique !== 'custom';
 }
 
 function selectTechnique(id) {
@@ -339,7 +390,34 @@ function selectTechnique(id) {
     child.setAttribute('aria-checked', String(TECHNIQUES[i].id === id));
   });
   els.techniqueDesc.textContent = techniqueById(id).desc;
+  els.customEditor.hidden = id !== 'custom';
 }
+
+function updateCustomMeta() {
+  const card = els.techniqueList.querySelector('[data-id="custom"] .t-meta');
+  if (card) card.textContent = customMetaText();
+}
+
+function renderCustomEditor() {
+  ['inhale', 'hold1', 'exhale', 'hold2'].forEach((key) => {
+    const valueEl = els.customEditor.querySelector(`.stepper-row[data-phase="${key}"] .stepper-value`);
+    const v = state.custom[key];
+    if (valueEl) valueEl.textContent = v === 0 ? 'Off' : v + 's';
+  });
+  updateCustomMeta();
+}
+
+els.customEditor.addEventListener('click', (e) => {
+  const btn = e.target.closest('.stepper-btn');
+  if (!btn) return;
+  const row = btn.closest('.stepper-row');
+  const key = row.dataset.phase;
+  const dir = Number(btn.dataset.dir);
+  const { min, max } = CUSTOM_LIMITS[key];
+  state.custom[key] = Math.min(max, Math.max(min, state.custom[key] + dir));
+  store.set('custom', state.custom);
+  renderCustomEditor();
+});
 
 function renderDurationList() {
   els.durationList.innerHTML = '';
@@ -411,13 +489,12 @@ if ('vibrate' in navigator) {
 
 /* ---- session control ---- */
 function startSession() {
-  const tech = techniqueById(state.technique);
-  session.phases = tech.phases;
+  session.phases = getTechniquePhases(state.technique);
   session.phaseIndex = 0;
   session.cycleNum = 1;
   session.value = 0;
   session.startValue = 0;
-  session.targetValue = TARGET_FOR[session.phases[0].key];
+  session.targetValue = session.phases[0].target;
   session.sessionStartTime = performance.now();
   session.phaseStartTime = session.sessionStartTime;
   session.totalDuration = state.duration;
@@ -425,7 +502,7 @@ function startSession() {
   session.running = true;
 
   audio.ensure();
-  audio.chime(session.phases[0].key);
+  audio.chime(toneFor(session.phases[0].target, false));
   speakPhase(session.phases[0].label);
   vibrate(12);
 
@@ -435,6 +512,7 @@ function startSession() {
 }
 
 function advancePhase(now) {
+  const prevTarget = session.targetValue;
   session.startValue = session.targetValue;
   session.phaseIndex++;
   if (session.phaseIndex >= session.phases.length) {
@@ -447,13 +525,14 @@ function advancePhase(now) {
   }
   session.phaseStartTime = now;
   const phase = session.phases[session.phaseIndex];
-  session.targetValue = TARGET_FOR[phase.key];
+  session.targetValue = phase.target;
+  const isHold = phase.target === prevTarget;
   els.phaseLabel.textContent = phase.label;
   els.cycleCount.textContent = 'Cycle ' + session.cycleNum;
   els.liveRegion.textContent = phase.label;
-  audio.chime(phase.key);
+  audio.chime(toneFor(phase.target, isHold));
   speakPhase(phase.label);
-  vibrate(phase.key === 'inhale' ? 14 : 10);
+  vibrate(phase.target === 1 && !isHold ? 14 : 10);
 }
 
 function finishSession(now) {
@@ -565,6 +644,7 @@ if ('serviceWorker' in navigator) {
 /* ---------------- init ---------------- */
 applyTechniqueAccent(state.technique);
 renderTechniqueList();
+renderCustomEditor();
 renderDurationList();
 setSoundUI(els.soundToggle, state.sound);
 setSoundUI(els.sessionSoundBtn, state.sound);
