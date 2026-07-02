@@ -1,4 +1,17 @@
-@font-face { font-family: 'system'; src: local(system-ui); }
+@font-face {
+  font-family: 'Fraunces';
+  src: url('fonts/Fraunces-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Fraunces';
+  src: url('fonts/Fraunces-SemiBoldItalic.ttf') format('truetype');
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
+}
 
 :root {
   --accent: #2dd4bf;
@@ -90,9 +103,12 @@ html, body {
 .brand { text-align: center; margin-bottom: clamp(24px, 5vh, 48px); }
 .brand-mark { width: 44px; height: 44px; color: var(--accent); transition: color 0.8s var(--ease); }
 .brand h1 {
-  font-size: 2.1rem;
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 2.35rem;
   font-weight: 600;
-  letter-spacing: 0.02em;
+  font-style: italic;
+  letter-spacing: 0.005em;
+  line-height: 1.15;
   margin: 10px 0 4px;
 }
 .tagline { color: var(--ink-faint); margin: 0; font-size: 0.95rem; letter-spacing: 0.01em; }
@@ -390,7 +406,7 @@ html, body {
 /* ---------- Complete screen ---------- */
 .complete-screen { justify-content: center; align-items: center; text-align: center; padding: 0 32px; }
 .complete-mark { width: 64px; height: 64px; color: var(--accent); margin-bottom: 22px; }
-.complete-screen h2 { font-size: 1.6rem; font-weight: 600; margin: 0 0 8px; }
+.complete-screen h2 { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-size: 1.7rem; font-weight: 600; margin: 0 0 8px; }
 .complete-stats { color: var(--ink-dim); margin: 0 0 4px; font-size: 0.95rem; }
 .complete-note { color: var(--ink-faint); margin: 0 0 32px; font-size: 0.88rem; }
 .complete-actions { display: flex; gap: 12px; width: 100%; max-width: 360px; }

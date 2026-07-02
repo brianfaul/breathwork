@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tidal-v10';
+const CACHE_NAME = 'tidal-v11';
 const SHELL = [
   './',
   'index.html',
@@ -9,6 +9,8 @@ const SHELL = [
   'icons/icon-192.png',
   'icons/icon-512.png',
   'icons/apple-touch-icon.png',
+  'fonts/Fraunces-SemiBold.ttf',
+  'fonts/Fraunces-SemiBoldItalic.ttf',
 ];
 
 self.addEventListener('install', (event) => {
