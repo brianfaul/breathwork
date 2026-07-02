@@ -108,7 +108,6 @@ const state = {
   technique: store.get('technique', 'box'),
   duration: store.get('duration', 180),
   sound: store.get('sound', true),
-  haptics: store.get('haptics', true),
   voice: store.get('voice', true),
   custom: store.get('custom', { inhale: 3, hold1: 3, exhale: 5, hold2: 0 }),
 };
@@ -198,10 +197,6 @@ class AudioEngine {
   }
 }
 const audio = new AudioEngine();
-
-function vibrate(ms) {
-  if (state.haptics && navigator.vibrate) navigator.vibrate(ms);
-}
 
 /* ---------------- Canvas scene: bioluminescent tide ---------------- */
 const canvas = byId('scene');
@@ -330,7 +325,7 @@ const els = {
   setup: byId('setupScreen'), sessionScreen: byId('sessionScreen'), complete: byId('completeScreen'),
   techniqueList: byId('techniqueList'), techniqueDesc: byId('techniqueDesc'), durationList: byId('durationList'),
   customEditor: byId('customEditor'),
-  soundToggle: byId('soundToggle'), hapticsToggle: byId('hapticsToggle'), voiceToggle: byId('voiceToggle'),
+  soundToggle: byId('soundToggle'), voiceToggle: byId('voiceToggle'),
   voiceTestBtn: byId('voiceTestBtn'),
   beginBtn: byId('beginBtn'), installBtn: byId('installBtn'), iosTip: byId('iosTip'),
   stopBtn: byId('stopBtn'), pauseBtn: byId('pauseBtn'), sessionSoundBtn: byId('sessionSoundBtn'),
@@ -475,17 +470,6 @@ if (voiceEngine.supported) {
   els.voiceTestBtn.addEventListener('click', () => voiceEngine.say('Breathe in slowly, and let it go.'));
 }
 
-if ('vibrate' in navigator) {
-  els.hapticsToggle.hidden = false;
-  els.hapticsToggle.setAttribute('aria-pressed', String(state.haptics));
-  els.hapticsToggle.addEventListener('click', () => {
-    state.haptics = !state.haptics;
-    store.set('haptics', state.haptics);
-    els.hapticsToggle.setAttribute('aria-pressed', String(state.haptics));
-    if (state.haptics) vibrate(12);
-  });
-}
-
 /* ---- session control ---- */
 function startSession() {
   session.phases = getTechniquePhases(state.technique);
@@ -503,7 +487,6 @@ function startSession() {
   audio.ensure();
   audio.chime(toneFor(session.phases[0].target, false));
   speakPhase(session.phases[0].label);
-  vibrate(12);
 
   els.phaseLabel.textContent = session.phases[0].label;
   els.cycleCount.textContent = 'Cycle 1';
@@ -531,7 +514,6 @@ function advancePhase(now) {
   els.liveRegion.textContent = phase.label;
   audio.chime(toneFor(phase.target, isHold));
   speakPhase(phase.label);
-  vibrate(phase.target === 1 && !isHold ? 14 : 10);
 }
 
 function finishSession(now) {
