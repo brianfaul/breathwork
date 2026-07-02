@@ -153,7 +153,7 @@ class VoiceEngine {
     if (!this.voice) this._pick();
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.rate = 0.85; u.pitch = 0.88; u.volume = 0.9;
+    u.rate = 0.76; u.pitch = 0.8; u.volume = 1;
     if (this.voice) u.voice = this.voice;
     window.speechSynthesis.speak(u);
   }
@@ -329,6 +329,7 @@ const els = {
   techniqueList: byId('techniqueList'), techniqueDesc: byId('techniqueDesc'), durationList: byId('durationList'),
   customEditor: byId('customEditor'),
   soundToggle: byId('soundToggle'), hapticsToggle: byId('hapticsToggle'), voiceToggle: byId('voiceToggle'),
+  voiceTestBtn: byId('voiceTestBtn'),
   beginBtn: byId('beginBtn'), installBtn: byId('installBtn'), iosTip: byId('iosTip'),
   stopBtn: byId('stopBtn'), pauseBtn: byId('pauseBtn'), sessionSoundBtn: byId('sessionSoundBtn'),
   sessionTimer: byId('sessionTimer'), ring: byId('ringProgress'), phaseLabel: byId('phaseLabel'),
@@ -468,6 +469,8 @@ if (voiceEngine.supported) {
   els.voiceToggle.hidden = false;
   els.voiceToggle.setAttribute('aria-pressed', String(state.voice));
   els.voiceToggle.addEventListener('click', () => applyVoice(!state.voice));
+  els.voiceTestBtn.hidden = false;
+  els.voiceTestBtn.addEventListener('click', () => voiceEngine.say('Breathe in slowly, and let it go.'));
 }
 
 if ('vibrate' in navigator) {

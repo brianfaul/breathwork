@@ -259,7 +259,7 @@ html, body {
 }
 .sound-switch[aria-checked="true"] .switch-thumb { transform: translateX(20px); }
 
-.toggles { display: flex; gap: 10px; margin-bottom: 8px; }
+.toggles { display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
 .toggle-btn {
   display: flex;
   align-items: center;
