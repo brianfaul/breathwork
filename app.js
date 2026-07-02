@@ -115,11 +115,13 @@ const state = {
 
 /* ---------------- Voice cues (browser speech synthesis) ---------------- */
 // Ranked by how warm/husky/elegant they tend to sound across platforms —
-// checked in order, first match wins. Neural voices (Edge/iOS) sound far
-// richer than classic robotic SAPI voices, so they're prioritized first.
+// checked in order, first match wins. "Google US English" is the voice
+// Google Maps/Android Auto navigation uses by default on Android, so it's
+// prioritized first when available. Neural voices (Edge/iOS) sound far
+// richer than classic robotic SAPI voices, so they're next.
 const VOICE_PRIORITY = [
+  /^google us english$/i, /google us english/i, /google uk english female/i, /^google .*female/i,
   /microsoft sonia/i, /microsoft libby/i, /microsoft aria/i, /microsoft jenny/i,
-  /google uk english female/i,
   /samantha/i, /victoria/i, /moira/i, /serena/i, /tessa/i, /karen/i,
   /zira/i, /hazel/i, /susan/i, /catherine/i, /fiona/i, /kate/i, /joanna/i, /olivia/i, /emma/i,
 ];

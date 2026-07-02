@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tidal-v13';
+const CACHE_NAME = 'tidal-v14';
 const SHELL = [
   './',
   'index.html',
