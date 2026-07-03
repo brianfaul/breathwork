@@ -250,7 +250,7 @@ function makeBubble(spawnAnywhere) {
     baseAlpha: 0.09 + Math.random() * 0.13,
   };
 }
-const bubbles = Array.from({ length: 20 }, () => makeBubble(true));
+const bubbles = Array.from({ length: 38 }, () => makeBubble(true));
 
 const NIGHT = ['#04060c', '#0a111f', '#0e1830'];
 const DAWN = ['#0b1220', '#111e34', '#17293f'];
