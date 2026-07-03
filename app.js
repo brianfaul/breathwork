@@ -238,6 +238,20 @@ function makeParticle(spawnAnywhere) {
 }
 const particles = Array.from({ length: 30 }, () => makeParticle(true));
 
+function makeBubble(spawnAnywhere) {
+  return {
+    fx: Math.random(),
+    fy: spawnAnywhere ? Math.random() : 1 + Math.random() * 0.1,
+    r: 7 + Math.random() * 17,
+    speed: 0.006 + Math.random() * 0.012,
+    wobbleSpeed: 0.3 + Math.random() * 0.5,
+    wobbleAmp: 0.008 + Math.random() * 0.016,
+    wobbleOffset: Math.random() * Math.PI * 2,
+    baseAlpha: 0.09 + Math.random() * 0.13,
+  };
+}
+const bubbles = Array.from({ length: 20 }, () => makeBubble(true));
+
 const NIGHT = ['#04060c', '#0a111f', '#0e1830'];
 const DAWN = ['#0b1220', '#111e34', '#17293f'];
 
@@ -281,6 +295,31 @@ function renderScene(now, breathValue, dawnProgress) {
     g.addColorStop(1, rgba(ACCENT, 0));
     ctx.fillStyle = g;
     ctx.beginPath(); ctx.arc(x, y, rad, 0, Math.PI * 2); ctx.fill();
+  });
+
+  // rising bubbles, larger and closer than the background particles
+  const bubbleSpeedMul = 0.6 + 0.8 * breathValue;
+  bubbles.forEach((b) => {
+    b.fy -= b.speed * bubbleSpeedMul * dt;
+    if (b.fy < -0.08) Object.assign(b, makeBubble(false));
+    const wobble = Math.sin(now / 1000 * b.wobbleSpeed + b.wobbleOffset) * b.wobbleAmp;
+    const x = (b.fx + wobble) * W, y = b.fy * H;
+    const r = b.r * (0.85 + 0.3 * breathValue);
+    const alpha = b.baseAlpha * (0.6 + 0.4 * breathValue);
+
+    const fill = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, 0, x, y, r);
+    fill.addColorStop(0, rgba(ACCENT, alpha * 1.3));
+    fill.addColorStop(0.7, rgba(ACCENT, alpha * 0.3));
+    fill.addColorStop(1, rgba(ACCENT, 0));
+    ctx.fillStyle = fill;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+
+    ctx.strokeStyle = rgba(ACCENT, alpha * 1.9);
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
+
+    ctx.fillStyle = rgba('#ffffff', alpha * 2.2);
+    ctx.beginPath(); ctx.arc(x - r * 0.35, y - r * 0.35, r * 0.22, 0, Math.PI * 2); ctx.fill();
   });
 
   // tide waves
