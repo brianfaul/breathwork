@@ -113,53 +113,47 @@ const state = {
   custom: store.get('custom', { inhale: 3, hold1: 3, exhale: 5, hold2: 0 }),
 };
 
-/* ---------------- Voice cues (browser speech synthesis) ---------------- */
-// Ranked by how warm/husky/elegant they tend to sound across platforms —
-// checked in order, first match wins. "Google US English" is the voice
-// Google Maps/Android Auto navigation uses by default on Android, so it's
-// prioritized first when available. Neural voices (Edge/iOS) sound far
-// richer than classic robotic SAPI voices, so they're next.
-const VOICE_PRIORITY = [
-  /^google us english$/i, /google us english/i, /google uk english female/i, /^google .*female/i,
-  /microsoft sonia/i, /microsoft libby/i, /microsoft aria/i, /microsoft jenny/i,
-  /samantha/i, /victoria/i, /moira/i, /serena/i, /tessa/i, /karen/i,
-  /zira/i, /hazel/i, /susan/i, /catherine/i, /fiona/i, /kate/i, /joanna/i, /olivia/i, /emma/i,
-];
-const MALE_VOICE_NAMES = /\b(david|mark|guy|alex|daniel|fred|oliver|george|james|ryan|matthew|brian|eric|justin|kevin|male)\b/i;
+/* ---------------- Voice cues (pre-recorded clips) ---------------- */
+const VOICE_CLIPS = {
+  'Breathe In': 'audio/breathe-in.mp3',
+  'Hold': 'audio/hold.mp3',
+  'Breathe Out': 'audio/breathe-out.mp3',
+};
 
 class VoiceEngine {
   constructor() {
-    this.supported = 'speechSynthesis' in window;
-    this.voice = null;
-    if (this.supported) {
-      this._pick();
-      window.speechSynthesis.onvoiceschanged = () => this._pick();
-    }
+    this.clips = {};
+    Object.entries(VOICE_CLIPS).forEach(([label, src]) => {
+      const el = new Audio(src);
+      el.preload = 'auto';
+      this.clips[label] = el;
+    });
   }
-  _pick() {
-    const voices = window.speechSynthesis.getVoices();
-    if (!voices.length) return false;
-    const pool = voices.filter((v) => /^en/i.test(v.lang));
-    const candidates = pool.length ? pool : voices;
-    for (const pattern of VOICE_PRIORITY) {
-      const match = candidates.find((v) => pattern.test(v.name));
-      if (match) { this.voice = match; return true; }
-    }
-    this.voice = candidates.find((v) => /female/i.test(v.name) && !MALE_VOICE_NAMES.test(v.name))
-      || candidates.find((v) => !MALE_VOICE_NAMES.test(v.name))
-      || candidates[0];
-    return true;
+  say(label) {
+    const clip = this.clips[label];
+    if (!clip) return;
+    this.stop();
+    clip.currentTime = 0;
+    clip.play().catch(() => {});
   }
-  say(text) {
-    if (!this.supported) return;
-    if (!this.voice) this._pick();
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.rate = 0.76; u.pitch = 0.8; u.volume = 1;
-    if (this.voice) u.voice = this.voice;
-    window.speechSynthesis.speak(u);
+  sayAll() {
+    const order = ['Breathe In', 'Hold', 'Breathe Out'];
+    const playNext = (i) => {
+      if (i >= order.length) return;
+      const clip = this.clips[order[i]];
+      clip.currentTime = 0;
+      clip.onended = () => playNext(i + 1);
+      clip.play().catch(() => {});
+    };
+    this.stop();
+    playNext(0);
   }
-  stop() { if (this.supported) window.speechSynthesis.cancel(); }
+  stop() {
+    Object.values(this.clips).forEach((a) => {
+      a.onended = null;
+      try { a.pause(); a.currentTime = 0; } catch (e) {}
+    });
+  }
 }
 const voiceEngine = new VoiceEngine();
 function speakPhase(label) {
@@ -467,13 +461,11 @@ function applyVoice(on) {
   els.voiceToggle.setAttribute('aria-pressed', String(on));
   if (!on) voiceEngine.stop();
 }
-if (voiceEngine.supported) {
-  els.voiceToggle.hidden = false;
-  els.voiceToggle.setAttribute('aria-pressed', String(state.voice));
-  els.voiceToggle.addEventListener('click', () => applyVoice(!state.voice));
-  els.voiceTestBtn.hidden = false;
-  els.voiceTestBtn.addEventListener('click', () => voiceEngine.say('Breathe in slowly, and let it go.'));
-}
+els.voiceToggle.hidden = false;
+els.voiceToggle.setAttribute('aria-pressed', String(state.voice));
+els.voiceToggle.addEventListener('click', () => applyVoice(!state.voice));
+els.voiceTestBtn.hidden = false;
+els.voiceTestBtn.addEventListener('click', () => voiceEngine.sayAll());
 
 if ('vibrate' in navigator) {
   els.hapticsToggle.hidden = false;
