@@ -26,6 +26,15 @@ const TECHNIQUES = [
     ],
   },
   {
+    id: 'full478', name: '4-7-8', meta: '4-7-8',
+    desc: "The full 4-7-8 count from Dr. Andrew Weil: breathe in for 4, hold for 7, breathe out slowly for 8. If the longer hold feels hard, start with Calm Exhale and work up to this.",
+    phases: [
+      { label: 'Breathe In', dur: 4, target: 1 },
+      { label: 'Hold', dur: 7, target: 1 },
+      { label: 'Breathe Out', dur: 8, target: 0 },
+    ],
+  },
+  {
     id: 'coherent', name: 'Coherent', meta: '5-5',
     desc: 'Smooth, even breathing at about 6 breaths a minute to balance your nervous system.',
     phases: [
