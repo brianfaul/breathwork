@@ -149,6 +149,9 @@ html, body {
   grid-column: 1 / -1;
   border-style: dashed;
 }
+.technique-card[data-id="full478"] {
+  grid-column: 1 / -1;
+}
 
 .technique-desc {
   margin: 12px 2px 0;
