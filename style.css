@@ -178,7 +178,7 @@ html, body {
 .stepper-row-label { font-size: 0.88rem; color: var(--ink); }
 .stepper { display: flex; align-items: center; gap: 14px; }
 .stepper-btn {
-  width: 30px; height: 30px;
+  width: 44px; height: 44px;
   border-radius: 50%;
   border: 1px solid var(--glass-border);
   background: rgba(255, 255, 255, 0.04);
@@ -310,6 +310,8 @@ html, body {
   padding: 8px;
 }
 .install-btn .icon { width: 16px; height: 16px; }
+button { touch-action: manipulation; }
+.safety-note { width: 100%; max-width: 420px; margin: 14px auto 0; font-size: 0.78rem; line-height: 1.5; color: var(--ink-dim); text-align: center; }
 .ios-tip { margin-top: 14px; font-size: 0.8rem; color: var(--ink-faint); text-align: center; }
 
 /* ---------- Session screen ---------- */
@@ -322,7 +324,7 @@ html, body {
   justify-content: space-between;
 }
 .icon-btn {
-  width: 40px; height: 40px;
+  width: 44px; height: 44px;
   display: flex; align-items: center; justify-content: center;
   background: var(--glass);
   border: 1px solid var(--glass-border);

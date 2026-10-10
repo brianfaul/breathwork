@@ -517,6 +517,25 @@ if ('vibrate' in navigator) {
   });
 }
 
+/* ---- keep the screen awake while a session is running ---- */
+let wakeLock = null;
+async function acquireWakeLock() {
+  try {
+    if (!('wakeLock' in navigator) || wakeLock) return;
+    const lock = await navigator.wakeLock.request('screen');
+    if (!session.running) { lock.release(); return; }
+    wakeLock = lock;
+    lock.addEventListener('release', () => { if (wakeLock === lock) wakeLock = null; });
+  } catch (e) { wakeLock = null; }
+}
+function releaseWakeLock() {
+  try { if (wakeLock) wakeLock.release(); } catch (e) {}
+  wakeLock = null;
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && session.running) acquireWakeLock();
+});
+
 /* ---- session control ---- */
 function startSession() {
   session.phases = getTechniquePhases(state.technique);
@@ -530,6 +549,7 @@ function startSession() {
   session.totalDuration = state.duration;
   session.paused = false;
   session.running = true;
+  acquireWakeLock();
 
   audio.ensure();
   audio.chime(toneFor(session.phases[0].target, false));
@@ -567,6 +587,7 @@ function advancePhase(now) {
 
 function finishSession(now) {
   session.running = false;
+  releaseWakeLock();
   voiceEngine.stop();
   const elapsedMin = Math.max(1, Math.round((now - session.sessionStartTime) / 60000));
   const cycles = Math.max(1, session.cycleNum - 1);
@@ -576,6 +597,7 @@ function finishSession(now) {
 
 function stopSession() {
   session.running = false;
+  releaseWakeLock();
   voiceEngine.stop();
   showScreen('setup');
 }
